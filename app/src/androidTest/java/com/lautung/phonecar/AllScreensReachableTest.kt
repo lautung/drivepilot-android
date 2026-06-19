@@ -1,10 +1,13 @@
 package com.lautung.phonecar
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasScrollToIndexAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import com.lautung.phonecar.data.local.InMemoryDemoStateStore
 import com.lautung.phonecar.ui.PhoneCarApp
 import com.lautung.phonecar.ui.PhoneCarViewModel
@@ -39,6 +42,7 @@ class AllScreensReachableTest {
         composeRule.onNodeWithText("我的").performClick()
         assertScreen("智能驾驶官")
         openAndBack("维保预约详情", "建议保养")
+        composeRule.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("帮助与客服中心"))
         openAndBack("帮助与客服中心", "救援车辆接运中")
         openAndBack("订阅服务", "v4.2.0-release")
         openAndBack("行车日志报告", "今日报告")

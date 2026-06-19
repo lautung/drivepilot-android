@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -65,10 +66,12 @@ fun CarLifeScreen(state: DemoState, onTab: (DiscoveryTab) -> Unit, onAdas: () ->
             }
         }
         item {
-            Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(Color.White).clickable(onClick = onAdas)) {
+            Column(Modifier.fillMaxWidth().testTag("discover_feature_card").clip(RoundedCornerShape(24.dp)).background(Color.White).clickable(onClick = onAdas)) {
                 Image(painterResource(R.drawable.vehicle_configurator), null, Modifier.fillMaxWidth().height(190.dp), contentScale = ContentScale.Crop)
-                Text("2026款全场景智驾实测，这次真的惊艳到我了...", Modifier.padding(top = 12.dp), fontWeight = FontWeight.Bold)
-                Text("智驾先锋   1.2k", color = Slate500, style = MaterialTheme.typography.bodySmall)
+                Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("2026款全场景智驾实测，这次真的惊艳到我了...", fontWeight = FontWeight.Bold)
+                    Text("智驾先锋   1.2k", color = Slate500, style = MaterialTheme.typography.bodySmall)
+                }
             }
         }
         item {

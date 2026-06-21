@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 2
+- **Total Sessions**: 3
 - **Last Active**: 2026-06-21
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~74 | Active |
+| `journal-1.md` | ~107 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 3 | 2026-06-21 | 忽略 IDE VCS 映射 | `17fe6bc` | `master` |
 | 2 | 2026-06-21 | 拆分 Android 与后端独立构建 | `8079b1e`, `ed51649` | `master` |
 | 1 | 2026-06-21 | 完成 Spring Boot 后端与 Android 同步 | `dff17cd` | `master` |
 <!-- @@@/auto:session-history -->

@@ -72,3 +72,36 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 3: 忽略 IDE VCS 映射
+
+**Date**: 2026-06-21
+**Task**: 忽略 IDE VCS 映射
+**Branch**: `master`
+
+### Summary
+
+将 .idea/vcs.xml 加入 Git 忽略规则，取消其暂存并提交 .gitignore。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `17fe6bc` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

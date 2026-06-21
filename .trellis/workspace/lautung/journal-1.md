@@ -38,3 +38,37 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 2: 拆分 Android 与后端独立构建
+
+**Date**: 2026-06-21
+**Task**: 拆分 Android 与后端独立构建
+**Branch**: `master`
+
+### Summary
+
+拆分 Android 与后端为两个独立 Gradle 工程，迁移 Docker、文档和工具，并完成 Android、后端、设备及容器健康验证。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `8079b1e` | (see git log) |
+| `ed51649` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

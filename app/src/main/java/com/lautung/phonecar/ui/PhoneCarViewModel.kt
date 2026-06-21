@@ -4,9 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.lautung.phonecar.data.local.DemoStateStore
+import com.lautung.phonecar.data.auth.AuthRepository
+import com.lautung.phonecar.data.auth.AuthState
 import com.lautung.phonecar.data.model.CameraAngle
 import com.lautung.phonecar.data.model.DemoState
 import com.lautung.phonecar.data.model.DiscoveryTab
+import com.lautung.phonecar.data.model.DiscoveryContent
 import com.lautung.phonecar.data.model.MaintenanceService
 import com.lautung.phonecar.data.model.PaintOption
 import com.lautung.phonecar.data.model.SubscriptionPlan
@@ -15,22 +18,76 @@ import com.lautung.phonecar.data.repository.DefaultContentRepository
 import com.lautung.phonecar.data.repository.DefaultProfileRepository
 import com.lautung.phonecar.data.repository.DefaultServiceRepository
 import com.lautung.phonecar.data.repository.DefaultVehicleRepository
+import com.lautung.phonecar.data.repository.BackendSyncRepository
+import com.lautung.phonecar.data.repository.ContentRepository
+import com.lautung.phonecar.data.repository.ProfileRepository
+import com.lautung.phonecar.data.repository.RemoteProfileRepository
+import com.lautung.phonecar.data.repository.RemoteServiceRepository
+import com.lautung.phonecar.data.repository.RemoteVehicleRepository
+import com.lautung.phonecar.data.repository.ServiceRepository
+import com.lautung.phonecar.data.repository.VehicleRepository
+import com.lautung.phonecar.data.remote.PhoneCarApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class PhoneCarViewModel(store: DemoStateStore) : ViewModel() {
-    private val vehicle = DefaultVehicleRepository(store)
-    private val content = DefaultContentRepository(store)
-    private val service = DefaultServiceRepository(store)
-    private val profile = DefaultProfileRepository(store)
+    constructor(
+        store: DemoStateStore,
+        authRepository: AuthRepository,
+        phoneCarApi: PhoneCarApi,
+    ) : this(store) {
+        this.authRepository = authRepository
+        this.phoneCarApi = phoneCarApi
+        val remoteSync = BackendSyncRepository(store, phoneCarApi)
+        backendSync = remoteSync
+        vehicle = RemoteVehicleRepository(store, remoteSync)
+        service = RemoteServiceRepository(store, phoneCarApi, remoteSync)
+        profile = RemoteProfileRepository(store, remoteSync)
+        syncError = remoteSync.error
+        discoveryContents = remoteSync.contents
+        authState = authRepository.state
+        viewModelScope.launch { authRepository.restore() }
+        viewModelScope.launch {
+            authRepository.state.collect { auth ->
+                when (auth) {
+                    is AuthState.SignedIn -> remoteSync.refresh()
+                    AuthState.SignedOut -> remoteSync.clearUserCache()
+                    else -> Unit
+                }
+            }
+        }
+    }
+
+    private var authRepository: AuthRepository? = null
+    private var phoneCarApi: PhoneCarApi? = null
+    private var backendSync: BackendSyncRepository? = null
+    private var vehicle: VehicleRepository = DefaultVehicleRepository(store)
+    private var content: ContentRepository = DefaultContentRepository(store)
+    private var service: ServiceRepository = DefaultServiceRepository(store)
+    private var profile: ProfileRepository = DefaultProfileRepository(store)
 
     val state: StateFlow<DemoState> = store.state.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = DemoState(),
     )
+
+    var authState: StateFlow<AuthState> = kotlinx.coroutines.flow.MutableStateFlow(
+        AuthState.SignedIn("offline-demo", "智能驾驶官", "USER"),
+    )
+        private set
+
+    var syncError: StateFlow<String?> = kotlinx.coroutines.flow.MutableStateFlow(null)
+        private set
+
+    var discoveryContents: StateFlow<List<DiscoveryContent>> = kotlinx.coroutines.flow.MutableStateFlow(emptyList())
+        private set
+
+    fun login(username: String, password: String) = launch { authRepository?.login(username, password) }
+    fun register(username: String, password: String) = launch { authRepository?.register(username, password) }
+    fun logout() = launch { authRepository?.logout() }
 
     fun setVehicleLocked(value: Boolean) = launch { vehicle.setVehicleLocked(value) }
     fun setAcEnabled(value: Boolean) = launch { vehicle.setAcEnabled(value) }
@@ -70,7 +127,10 @@ class PhoneCarViewModel(store: DemoStateStore) : ViewModel() {
 
 class PhoneCarViewModelFactory(
     private val store: DemoStateStore,
+    private val authRepository: AuthRepository,
+    private val phoneCarApi: PhoneCarApi,
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T = PhoneCarViewModel(store) as T
+    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+        PhoneCarViewModel(store, authRepository, phoneCarApi) as T
 }

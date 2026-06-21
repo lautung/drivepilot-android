@@ -1,0 +1,5 @@
+ALTER TABLE refresh_tokens
+    ALTER COLUMN token_hash TYPE VARCHAR(64);
+
+ALTER TABLE media_assets
+    ALTER COLUMN sha256 TYPE VARCHAR(64);

@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-phonecar}
+      POSTGRES_USER: ${DB_USERNAME:-phonecar}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-phonecar_dev}
+    ports:
+      - "5432:5432"
+    volumes:
+      - phonecar-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-phonecar} -d ${DB_NAME:-phonecar}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  minio:
+    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-phonecar_minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-phonecar_minio_dev}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - phonecar-minio:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-phonecar}
+      DB_USERNAME: ${DB_USERNAME:-phonecar}
+      DB_PASSWORD: ${DB_PASSWORD:-phonecar_dev}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-change-this-secret-at-least-32-bytes}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin-change-me}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://10.0.2.2:9000}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-phonecar_minio}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-phonecar_minio_dev}
+      MINIO_BUCKET: ${MINIO_BUCKET:-phonecar-media}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  phonecar-postgres:
+  phonecar-minio:

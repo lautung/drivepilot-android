@@ -32,14 +32,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lautung.phonecar.R
 import com.lautung.phonecar.data.model.DemoState
+import com.lautung.phonecar.data.model.DiscoveryContent
 import com.lautung.phonecar.data.model.DiscoveryTab
 import com.lautung.phonecar.data.model.PaintOption
 import com.lautung.phonecar.data.model.WheelOption
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.lautung.phonecar.ui.components.ConfirmActionDialog
 import com.lautung.phonecar.ui.components.PrimaryActionButton
 import com.lautung.phonecar.ui.theme.BrandBlue
@@ -49,7 +53,8 @@ import com.lautung.phonecar.ui.theme.Slate500
 import com.lautung.phonecar.ui.theme.Slate900
 
 @Composable
-fun CarLifeScreen(state: DemoState, onTab: (DiscoveryTab) -> Unit, onAdas: () -> Unit, onLive: () -> Unit) {
+fun CarLifeScreen(state: DemoState, contents: List<DiscoveryContent> = emptyList(), onTab: (DiscoveryTab) -> Unit, onAdas: () -> Unit, onLive: () -> Unit) {
+    val remoteFeature = contents.firstOrNull { it.category == state.discoveryTab.name }
     LazyColumn(Modifier.fillMaxSize().background(Color.White), contentPadding = androidx.compose.foundation.layout.PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
             Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(Slate100).padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -67,10 +72,24 @@ fun CarLifeScreen(state: DemoState, onTab: (DiscoveryTab) -> Unit, onAdas: () ->
         }
         item {
             Column(Modifier.fillMaxWidth().testTag("discover_feature_card").clip(RoundedCornerShape(24.dp)).background(Color.White).clickable(onClick = onAdas)) {
-                Image(painterResource(R.drawable.vehicle_configurator), null, Modifier.fillMaxWidth().height(190.dp), contentScale = ContentScale.Crop)
+                if (remoteFeature?.mediaUrl != null && remoteFeature.mediaId != null) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(remoteFeature.mediaUrl)
+                            .memoryCacheKey(remoteFeature.mediaId)
+                            .diskCacheKey(remoteFeature.mediaId)
+                            .build(),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxWidth().height(190.dp),
+                        contentScale = ContentScale.Crop,
+                        error = painterResource(R.drawable.vehicle_configurator),
+                    )
+                } else {
+                    Image(painterResource(R.drawable.vehicle_configurator), null, Modifier.fillMaxWidth().height(190.dp), contentScale = ContentScale.Crop)
+                }
                 Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("2026款全场景智驾实测，这次真的惊艳到我了...", fontWeight = FontWeight.Bold)
-                    Text("智驾先锋   1.2k", color = Slate500, style = MaterialTheme.typography.bodySmall)
+                    Text(remoteFeature?.title ?: "2026款全场景智驾实测，这次真的惊艳到我了...", fontWeight = FontWeight.Bold)
+                    Text(remoteFeature?.summary ?: "智驾先锋   1.2k", color = Slate500, style = MaterialTheme.typography.bodySmall)
                 }
             }
         }
@@ -148,7 +167,7 @@ private fun WheelChoice(title: String, price: String, image: Int, selected: Bool
 }
 
 @Composable
-fun ProfileScreen(onDrivingLog: () -> Unit, onMaintenance: () -> Unit, onVehicleOrder: () -> Unit, onSoftware: () -> Unit, onPrivacy: () -> Unit, onRescue: () -> Unit) {
+fun ProfileScreen(onDrivingLog: () -> Unit, onMaintenance: () -> Unit, onVehicleOrder: () -> Unit, onSoftware: () -> Unit, onPrivacy: () -> Unit, onRescue: () -> Unit, onLogout: () -> Unit = {}) {
     LazyColumn(Modifier.fillMaxSize().background(Color.White), contentPadding = androidx.compose.foundation.layout.PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -178,6 +197,7 @@ fun ProfileScreen(onDrivingLog: () -> Unit, onMaintenance: () -> Unit, onVehicle
         item { ProfileRow("车载精品订单", R.drawable.ic_solar_case_minimalistic_bold, onVehicleOrder) }
         item { ProfileRow("安全与隐私设置", R.drawable.ic_solar_shield_keyhole_bold, onPrivacy) }
         item { ProfileRow("帮助与客服中心", R.drawable.ic_solar_question_square_bold, onRescue) }
+        item { ProfileRow("退出登录", R.drawable.ic_solar_user_circle_bold, onLogout) }
     }
 }
 

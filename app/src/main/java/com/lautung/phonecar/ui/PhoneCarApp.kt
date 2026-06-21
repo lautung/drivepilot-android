@@ -6,9 +6,13 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -37,10 +41,44 @@ import com.lautung.phonecar.ui.screens.SoftwareScreen
 import com.lautung.phonecar.ui.screens.VehicleHomeScreen
 import com.lautung.phonecar.ui.theme.BrandBlue
 import com.lautung.phonecar.ui.theme.Slate400
+import com.lautung.phonecar.data.auth.AuthState
+import com.lautung.phonecar.ui.screens.AuthScreen
 
 @Composable
 fun PhoneCarApp(viewModel: PhoneCarViewModel) {
+    val authState by viewModel.authState.collectAsStateWithLifecycle()
+    when (val auth = authState) {
+        AuthState.Restoring -> AuthScreen(
+            loading = true,
+            errorMessage = null,
+            onLogin = { _, _ -> },
+            onRegister = { _, _ -> },
+        )
+        AuthState.SignedOut -> AuthScreen(
+            loading = false,
+            errorMessage = null,
+            onLogin = viewModel::login,
+            onRegister = viewModel::register,
+        )
+        is AuthState.Error -> AuthScreen(
+            loading = false,
+            errorMessage = auth.message,
+            onLogin = viewModel::login,
+            onRegister = viewModel::register,
+        )
+        is AuthState.SignedIn -> AuthenticatedPhoneCarApp(viewModel)
+    }
+}
+
+@Composable
+private fun AuthenticatedPhoneCarApp(viewModel: PhoneCarViewModel) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val discoveryContents by viewModel.discoveryContents.collectAsStateWithLifecycle()
+    val syncError by viewModel.syncError.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(syncError) {
+        syncError?.let { snackbarHostState.showSnackbar(it) }
+    }
     val navController = rememberNavController()
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route ?: AppRoute.HOME.route
@@ -48,6 +86,7 @@ fun PhoneCarApp(viewModel: PhoneCarViewModel) {
 
     Scaffold(
         containerColor = Color.White,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             if (currentRoute in topLevelRoutes) {
                 NavigationBar(containerColor = Color.White) {
@@ -140,6 +179,7 @@ fun PhoneCarApp(viewModel: PhoneCarViewModel) {
             composable(AppRoute.DISCOVER.route) {
                 CarLifeScreen(
                     state = state,
+                    contents = discoveryContents,
                     onTab = viewModel::selectDiscoveryTab,
                     onAdas = { navController.navigate(AppRoute.ADAS.route) },
                     onLive = { navController.navigate(AppRoute.LIVE.route) },
@@ -171,6 +211,7 @@ fun PhoneCarApp(viewModel: PhoneCarViewModel) {
                     onSoftware = { navController.navigate(AppRoute.SOFTWARE.route) },
                     onPrivacy = { navController.navigate(AppRoute.PRIVACY.route) },
                     onRescue = { navController.navigate(AppRoute.RESCUE.route) },
+                    onLogout = viewModel::logout,
                 )
             }
             composable(AppRoute.MAINTENANCE.route) {

@@ -2,20 +2,20 @@
 
 ## 当前技术栈
 
-- 多模块 Gradle 工程：Android 客户端为 `:app`，Java 服务端为 `:backend`。
+- Android 位于 `apps/android/`，是只包含 `:app` 的独立 Gradle 工程；Java 后端位于独立的 `services/backend/` 工程。
 - Kotlin 2.3.21、Jetpack Compose、Material 3、Navigation Compose 2.9.8。
 - ViewModel + Kotlin Flow 管理状态，Preferences DataStore 1.2.1 保存本地 UI 状态和最近确认缓存。
 - Retrofit 3、OkHttp 5 与 Kotlinx Serialization 负责 API；Coil 3 加载发现内容预签名图片。
 - JUnit 4 执行 JVM 测试，AndroidX Test + Compose UI Test 执行设备测试。
-- `minSdk 24`、`targetSdk 36`，Java 源/目标兼容级别为 11（`app/build.gradle.kts`）。
+- `minSdk 24`、`targetSdk 36`，Java 源/目标兼容级别为 11（`apps/android/app/build.gradle.kts`）。
 - `MainActivity` 是唯一 Activity；`PhoneCarApplication` 和 `AppContainer` 完成轻量手工依赖装配。
 
-版本号以 `gradle/libs.versions.toml` 为准，不在源码或其他 Gradle 文件重复硬编码。
+Android 版本号以 `apps/android/gradle/libs.versions.toml` 为准，不读取后端 version catalog，也不在源码或其他 Gradle 文件重复硬编码。
 
 ## 目录职责
 
 ```text
-app/src/main/
+apps/android/app/src/main/
 ├── AndroidManifest.xml
 ├── java/com/lautung/phonecar/
 │   ├── AppContainer.kt                # DataStore 和 ViewModelFactory 装配
@@ -36,7 +36,7 @@ app/src/main/
 └── res/values/                        # 应用元数据和 Android 主题
 ```
 
-测试镜像生产包路径：纯 Kotlin/数据测试放在 `app/src/test/java`，Compose 导航与页面测试放在 `app/src/androidTest/java`。
+测试镜像生产包路径：纯 Kotlin/数据测试放在 `apps/android/app/src/test/java`，Compose 导航与页面测试放在 `apps/android/app/src/androidTest/java`。
 
 ## 放置规则
 

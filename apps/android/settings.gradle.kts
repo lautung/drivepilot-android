@@ -19,6 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "PhoneCar"
+rootProject.name = "PhoneCarAndroid"
 include(":app")
-include(":backend")

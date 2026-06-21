@@ -29,5 +29,6 @@
 - 源码、脚本和文档使用 UTF-8；Kotlin 使用官方代码风格（`gradle.properties`）。
 - 当前产品是联网同步、支持缓存读取的高保真手机竖屏原型；只允许调用 PhoneCar 演示后端，不得加入真实车控、支付、定位、相机或蓝牙行为。
 - 网络业务写入必须成功后再更新确认状态；断网时只读最近缓存，不实现离线写入队列。
-- 依赖通过 `gradle/libs.versions.toml` 集中声明，应用依赖写在 `app/build.gradle.kts`。
+- Android 是 `apps/android/` 下的独立 Gradle 工程，只包含 `:app`，不得读取后端 Gradle 配置。
+- 依赖通过 `apps/android/gradle/libs.versions.toml` 集中声明，应用依赖写在 `apps/android/app/build.gradle.kts`。
 - 不修改与任务无关的生成文件、IDE 配置或原型素材。

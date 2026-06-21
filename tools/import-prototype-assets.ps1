@@ -7,11 +7,11 @@ $root = Split-Path -Parent $PSScriptRoot
 $prototypePath = if ($Prototype) {
     Join-Path $root $Prototype
 } else {
-    (Get-ChildItem -LiteralPath (Join-Path $root "doc") -Filter "*_v8.html" | Select-Object -First 1).FullName
+    (Get-ChildItem -LiteralPath (Join-Path $root "docs/prototype") -Filter "*_v8.html" | Select-Object -First 1).FullName
 }
 if (-not $prototypePath) { throw "Prototype HTML was not found." }
-$drawableDir = Join-Path $root "app/src/main/res/drawable"
-$imageDir = Join-Path $root "app/src/main/res/drawable-nodpi"
+$drawableDir = Join-Path $root "apps/android/app/src/main/res/drawable"
+$imageDir = Join-Path $root "apps/android/app/src/main/res/drawable-nodpi"
 New-Item -ItemType Directory -Force -Path $drawableDir, $imageDir | Out-Null
 
 $utf8 = New-Object System.Text.UTF8Encoding($false)

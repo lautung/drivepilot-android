@@ -1,6 +1,7 @@
 *.iml
-.gradle
-/local.properties
+**/.gradle/
+**/.kotlin/
+**/local.properties
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml
@@ -9,13 +10,10 @@
 /.idea/assetWizardSettings.xml
 /.idea/deviceManager.xml
 .DS_Store
-/build
+**/build/
 /captures
 .externalNativeBuild
 .cxx
-local.properties
-backend/build/
-
 # Local developer and runtime state
 .developer
 .developer/

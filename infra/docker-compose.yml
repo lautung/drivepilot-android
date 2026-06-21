@@ -1,3 +1,5 @@
+name: phonecar
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -34,8 +36,8 @@ services:
 
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ../services/backend
+      dockerfile: Dockerfile
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-phonecar}
       DB_USERNAME: ${DB_USERNAME:-phonecar}

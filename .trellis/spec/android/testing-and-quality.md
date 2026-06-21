@@ -4,7 +4,7 @@
 
 ### JVM 单元测试
 
-放在 `app/src/test/java`，覆盖不依赖 Android 运行时的规则：
+放在 `apps/android/app/src/test/java`，覆盖不依赖 Android 运行时的规则：
 
 - `DemoStateTest`：默认值、派生价格、边界收敛、集合 toggle。
 - `DemoStatePreferencesTest`：完整 round-trip、空 Preferences 默认值、非法 enum 回退。
@@ -15,7 +15,7 @@
 
 ### Compose 设备测试
 
-放在 `app/src/androidTest/java`，通过 `createComposeRule()` 直接渲染：
+放在 `apps/android/app/src/androidTest/java`，通过 `createComposeRule()` 直接渲染：
 
 ```kotlin
 val viewModel = PhoneCarViewModel(InMemoryDemoStateStore())
@@ -48,6 +48,7 @@ composeRule.setContent { PhoneCarTheme { PhoneCarApp(viewModel) } }
 PowerShell 7 下的项目命令：
 
 ```powershell
+Set-Location apps/android
 .\gradlew.bat testDebugUnitTest
 .\gradlew.bat lintDebug
 .\gradlew.bat assembleDebug

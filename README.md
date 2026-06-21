@@ -81,7 +81,7 @@ The server is authoritative for signed-in business state. DataStore retains the 
 
 ## Run the Local Backend
 
-Copy the environment example and replace the sample database, JWT, admin, and MinIO secrets:
+Copy the environment example and replace the sample database, JWT, admin, read-only viewer, and MinIO secrets:
 
 ```powershell
 Copy-Item infra/.env.example infra/.env
@@ -101,7 +101,7 @@ Set-Location apps/android
 .\gradlew.bat assembleDebug -PPHONECAR_API_BASE_URL=http://192.168.1.10:8080/api/v1/
 ```
 
-The bootstrap admin comes from `ADMIN_USERNAME` and `ADMIN_PASSWORD`; normal registration always creates `USER`. MinIO credentials are never sent to Android. Use HTTPS, strong random secrets, and a reverse proxy before public deployment.
+The bootstrap admin comes from `ADMIN_USERNAME`/`ADMIN_PASSWORD`; the read-only Admin demo account comes from `VIEWER_USERNAME`/`VIEWER_PASSWORD`. Normal registration always creates `USER`. Android keeps its JSON refresh-token contract, while the future Web Admin uses `/api/v1/auth/admin/*` with an HttpOnly refresh cookie. MinIO credentials are never sent to clients. The `prod` profile rejects development secrets, insecure Admin cookies, and non-HTTPS public media endpoints.
 
 ## Build and Install Android
 
@@ -131,6 +131,14 @@ Run repository-level verification from the root:
 ```powershell
 pwsh -File .\tools\verify-all.ps1
 pwsh -File .\tools\verify-all.ps1 -IncludeDeviceTests
+```
+
+When an API change is intentional, review and update the committed OpenAPI snapshot explicitly:
+
+```powershell
+Push-Location services/backend
+.\gradlew.bat '-Dphonecar.updateOpenApiSnapshot=true' test --tests '*OpenApiContractTest'
+Pop-Location
 ```
 
 Or run each project separately:

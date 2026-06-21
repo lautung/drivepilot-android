@@ -1,0 +1,28 @@
+{
+  "id": "project-completeness-roadmap",
+  "name": "project-completeness-roadmap",
+  "title": "探索项目完整性与下一步",
+  "description": "",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "lautung",
+  "assignee": "lautung",
+  "createdAt": "2026-06-21",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "master",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "06-21-backend-contract-security-baseline"
+  ],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {}
+}

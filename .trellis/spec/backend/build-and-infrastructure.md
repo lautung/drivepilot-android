@@ -38,7 +38,8 @@ Set-Location apps/android
 - 后端 Jar 固定为 `services/backend/build/libs/phonecar-backend.jar`。
 - backend 镜像构建上下文固定为 `../services/backend`，Dockerfile 只能复制上下文内文件。
 - Compose 顶层 project name 固定为 `phonecar`，服务名和卷 key 保持 `postgres`、`minio`、`backend`、`phonecar-postgres`、`phonecar-minio`。
-- 必需环境键沿用 [API、认证、数据库与对象存储契约](./contracts-and-storage.md)；真实值只放 `infra/.env` 或部署平台，不进入 Git。
+- 必需环境键沿用 [API、认证、数据库与对象存储契约](./contracts-and-storage.md)；包括 Admin/Viewer 凭据、Cookie secure 开关和可信代理列表。真实值只放 `infra/.env` 或部署平台，不进入 Git。
+- `prod` profile 必须在启动时拒绝开发 JWT secret、弱/相同的 Admin 与 Viewer 凭据、非 Secure Admin Cookie、非 HTTPS 公共媒体 endpoint 和弱对象存储 secret。
 - `.dockerignore` 必须排除 build、Gradle cache、`.env`、runtime、临时文件和密钥。
 
 ### 4. Validation & Error Matrix
@@ -51,11 +52,12 @@ Set-Location apps/android
 | Dockerfile 找不到固定 bootJar | 镜像构建失败；核对 archiveFileName 和 COPY 路径 |
 | backend build context 包含整个仓库 | 拒绝变更，扩大 secret/缓存泄露面 |
 | Git 中出现 `.env`、密钥、runtime 或 build 输出 | 删除出暂存区并补充 ignore 规则 |
+| `prod` 使用本地默认凭据或 HTTP 公共媒体地址 | 启动守卫失败；修复部署 secret/TLS 配置，不绕过守卫 |
 | Java 版本不是 21 | Gradle toolchain 或容器构建失败；使用 Java 21 环境 |
 
 ### 5. Good / Base / Bad Cases
 
-- Good：两端分别运行 Wrapper 可独立通过；Docker context 只传输后端源码和构建文件；Compose 复用现有 `phonecar` 卷。
+- Good：两端分别运行 Wrapper 可独立通过；Docker context 只传输后端源码和构建文件；Compose 复用现有 `phonecar` 卷并通过新增 migration 升级。
 - Base：从仓库根运行 `tools/verify-all.ps1`，脚本进入两个工程目录执行原生命令并校验 Compose。
 - Bad：在仓库根恢复 `settings.gradle.kts` 并同时 include `:app`、`:backend`；后端 Dockerfile 从 `../gradle` 复制 Android version catalog；执行 `docker compose down -v` 清除开发数据。
 
@@ -65,6 +67,7 @@ Set-Location apps/android
 - 后端：`test bootJar`，并断言固定 Jar 存在。
 - Docker：`config --quiet`、`build backend`、`up -d`，断言三个服务 healthy。
 - HTTP：断言 `/actuator/health` 返回 `UP`，`/v3/api-docs` 可读取。
+- 升级：在已有开发卷执行 `docker compose up -d backend`，确认 V3 角色约束、Viewer 初始化、HttpOnly Cookie 和 Viewer 写入 `403`。
 - 仓库卫生：确认根无 Gradle settings/Wrapper，两个 catalog 无交叉依赖，Git 状态不包含 secret、runtime 或 build 输出。
 
 ### 7. Wrong vs Correct

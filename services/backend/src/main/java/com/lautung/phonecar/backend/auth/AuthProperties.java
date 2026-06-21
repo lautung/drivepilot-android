@@ -9,4 +9,6 @@ public record AuthProperties(
         Duration accessTokenTtl,
         Duration refreshTokenTtl,
         String adminUsername,
-        String adminPassword) {}
+        String adminPassword,
+        String viewerUsername,
+        String viewerPassword) {}

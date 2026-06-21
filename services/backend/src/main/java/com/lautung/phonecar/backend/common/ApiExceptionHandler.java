@@ -6,6 +6,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.validation.FieldError;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -32,6 +33,11 @@ public class ApiExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     ProblemDetail handleConflict(DataIntegrityViolationException exception, ServletWebRequest request) {
         return problem(HttpStatus.CONFLICT, "DATA_CONFLICT", "The request conflicts with existing data", request);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    ProblemDetail handleUploadTooLarge(MaxUploadSizeExceededException exception, ServletWebRequest request) {
+        return problem(HttpStatus.PAYLOAD_TOO_LARGE, "MEDIA_TOO_LARGE", "Image exceeds the upload limit", request);
     }
 
     private FieldViolation toViolation(FieldError error) {

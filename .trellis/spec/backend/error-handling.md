@@ -7,6 +7,8 @@
 - 每个错误响应包含 `status`、`title`、`detail`、请求路径 `instance`、稳定 `code` 和 `fieldErrors` 数组。
 - Bean Validation 失败统一为 `400 VALIDATION_FAILED`，`fieldErrors` 元素固定为 `{field,message}`。
 - 数据库唯一性等完整性冲突在边界统一映射为 `409 DATA_CONFLICT`；已知业务冲突应提前抛出更具体的 `ApiException`。
+- multipart 在进入 Controller 前超过 Servlet 上限时，由 `ApiExceptionHandler` 把 `MaxUploadSizeExceededException` 映射为 `413 MEDIA_TOO_LARGE`，不能落入默认 HTML/不稳定错误。
+- HandlerInterceptor 中的限流抛出 `ApiException(429, "RATE_LIMITED", ...)`，由同一 Advice 输出 ProblemDetail，并设置 `Retry-After`。
 - `application.yml` 禁止默认错误响应包含异常 message 或 stacktrace。
 
 ## 抛出位置
@@ -15,6 +17,7 @@
 - Service/领域逻辑抛出业务错误，例如 `USERNAME_TAKEN`、`INVALID_REFRESH_TOKEN`、`MEDIA_IN_USE`。
 - Repository 不抛 HTTP 异常；查询为空后由调用方转换为领域错误。
 - 外部存储异常转换为稳定上层错误，例如 MinIO 失败转为 `503 MEDIA_STORAGE_UNAVAILABLE`，不向客户端暴露 SDK 异常或内部 endpoint。
+- 媒体魔数不支持使用 `UNSUPPORTED_MEDIA`；声明 MIME 与魔数不一致使用 `MEDIA_TYPE_MISMATCH`，避免客户端伪造 content type。
 
 ## 安全边界
 

@@ -42,10 +42,17 @@ public class AuthService {
 
     @Transactional
     public AuthResult login(String rawUsername, String password) {
-        UserEntity user = users.findByUsername(normalizeUsername(rawUsername))
-                .filter(UserEntity::isEnabled)
-                .orElseThrow(this::invalidCredentials);
-        if (!passwordEncoder.matches(password, user.getPasswordHash())) throw invalidCredentials();
+        UserEntity user = authenticate(rawUsername, password);
+        if (user.getRole() != UserRole.USER) throw invalidCredentials();
+        return result(user, tokens.issue(user));
+    }
+
+    @Transactional
+    public AuthResult loginAdmin(String rawUsername, String password) {
+        UserEntity user = authenticate(rawUsername, password);
+        if (user.getRole() != UserRole.ADMIN && user.getRole() != UserRole.ADMIN_VIEWER) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "ADMIN_ACCESS_REQUIRED", "Admin access is required");
+        }
         return result(user, tokens.issue(user));
     }
 
@@ -55,6 +62,14 @@ public class AuthService {
     }
 
     public void logout(String refreshToken) { tokens.revoke(refreshToken); }
+
+    private UserEntity authenticate(String rawUsername, String password) {
+        UserEntity user = users.findByUsername(normalizeUsername(rawUsername))
+                .filter(UserEntity::isEnabled)
+                .orElseThrow(this::invalidCredentials);
+        if (!passwordEncoder.matches(password, user.getPasswordHash())) throw invalidCredentials();
+        return user;
+    }
 
     private String normalizeUsername(String value) {
         return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);

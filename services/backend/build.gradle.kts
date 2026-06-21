@@ -24,6 +24,7 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation(libs.springdoc.openapi.ui)
     implementation(libs.minio)
+    implementation(libs.bucket4j.core)
     runtimeOnly("org.postgresql:postgresql")
 
     testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
@@ -40,6 +41,10 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    systemProperty(
+        "phonecar.updateOpenApiSnapshot",
+        System.getProperty("phonecar.updateOpenApiSnapshot", "false"),
+    )
 }
 
 tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {

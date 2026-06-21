@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,13 +26,16 @@ public class AdminMediaController {
     private final MediaService service;
     private final MediaAssetRepository media;
     public AdminMediaController(MediaService service, MediaAssetRepository media) { this.service = service; this.media = media; }
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(consumes = "multipart/form-data") @ResponseStatus(HttpStatus.CREATED)
     MediaResponse upload(@AuthenticationPrincipal Jwt jwt, @RequestPart("file") MultipartFile file) { return response(service.upload(UUID.fromString(jwt.getSubject()), file)); }
+    @PreAuthorize("hasAnyRole('ADMIN', 'ADMIN_VIEWER')")
     @GetMapping @Transactional(readOnly = true)
     PageResponse<MediaResponse> list(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
         if (page < 0 || size < 1 || size > 100) throw new com.lautung.phonecar.backend.common.ApiException(HttpStatus.BAD_REQUEST, "INVALID_PAGE", "Invalid pagination");
         return PageResponse.from(media.findAll(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))), this::response);
     }
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}") @ResponseStatus(HttpStatus.NO_CONTENT) void delete(@PathVariable UUID id) { service.delete(id); }
     private MediaResponse response(MediaAssetEntity e) { return new MediaResponse(e.getId(), e.getOriginalFilename(), e.getContentType(), e.getSizeBytes(), e.getSha256(), e.getStatus().name(), e.getCreatedAt()); }
     public record MediaResponse(UUID id, String originalFilename, String contentType, long sizeBytes, String sha256, String status, java.time.Instant createdAt) {}

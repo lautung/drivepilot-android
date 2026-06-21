@@ -8,7 +8,7 @@
 services/backend/src/main/
 ├── java/com/lautung/phonecar/backend/
 │   ├── auth/       # 登录、JWT、refresh token、Security、管理员初始化
-│   ├── common/     # 跨领域 HTTP 错误和通用分页响应
+│   ├── common/     # 跨领域 HTTP 错误、分页、OpenAPI 与请求限流
 │   ├── content/    # 发现内容、关注、发布管理
 │   ├── media/      # MinIO 配置、媒体元数据和管理接口
 │   ├── service/    # 预约、维保和订阅演示业务
@@ -22,7 +22,7 @@ services/backend/src/main/
 ## 放置规则
 
 - 按业务领域放置 Controller、Service、Entity 和 Repository，不创建全局 `controllers/`、`entities/` 目录。
-- `common/` 只保存确实被多个领域使用的类型；现有例子是 `ApiException`、`ApiExceptionHandler`、`PageResponse`。
+- `common/` 只保存确实被多个领域使用的类型；现有例子是 `ApiException`、`ApiExceptionHandler`、`PageResponse`、`OpenApiConfig` 和请求限流配置。Web Admin Cookie 会话仍属于 `auth/`，不能因为被前端使用就移到 `common/`。
 - HTTP 请求/响应 DTO 优先作为所属 Controller 的 `public record`，例如 `VehicleStateController.VehicleStatePatch` 和 `UserPreferencesController.PreferencesResponse`。
 - 领域内部投影可放在 Service 中，例如 `AuthService.AuthResult`、`ContentService.ContentView`；仅实现细节使用 `private record`，例如 `MediaService.DetectedImage`。
 - Entity 和 Repository 与所属领域同包。仅供包内 Service/Controller 使用的 Repository 保持 package-private；确实跨领域注入的 Repository 才声明 `public`。

@@ -27,10 +27,14 @@ public class AdminBootstrap implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        String username = properties.adminUsername() == null ? "" : properties.adminUsername().trim().toLowerCase(Locale.ROOT);
-        String password = properties.adminPassword();
+        createIfMissing(properties.adminUsername(), properties.adminPassword(), UserRole.ADMIN);
+        createIfMissing(properties.viewerUsername(), properties.viewerPassword(), UserRole.ADMIN_VIEWER);
+    }
+
+    private void createIfMissing(String rawUsername, String password, UserRole role) {
+        String username = rawUsername == null ? "" : rawUsername.trim().toLowerCase(Locale.ROOT);
         if (username.isBlank() || password == null || password.isBlank() || users.existsByUsername(username)) return;
         Instant now = Instant.now();
-        users.save(new UserEntity(UUID.randomUUID(), username, passwordEncoder.encode(password), UserRole.ADMIN, now));
+        users.save(new UserEntity(UUID.randomUUID(), username, passwordEncoder.encode(password), role, now));
     }
 }

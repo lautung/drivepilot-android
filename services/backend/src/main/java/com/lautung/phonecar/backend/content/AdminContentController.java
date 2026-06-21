@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,11 +24,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminContentController {
     private final ContentService service;
     public AdminContentController(ContentService service) { this.service = service; }
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping @ResponseStatus(HttpStatus.CREATED) ContentService.ContentView create(@Valid @RequestBody ContentRequest r) { return service.create(r.toService()); }
+    @PreAuthorize("hasAnyRole('ADMIN', 'ADMIN_VIEWER')")
     @GetMapping PageResponse<ContentService.ContentView> list(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) { return service.adminList(page, size); }
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}") ContentService.ContentView update(@PathVariable UUID id, @Valid @RequestBody ContentRequest r) { return service.update(id, r.toService()); }
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/publish") ContentService.ContentView publish(@PathVariable UUID id) { return service.publish(id); }
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/unpublish") ContentService.ContentView unpublish(@PathVariable UUID id) { return service.unpublish(id); }
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}") @ResponseStatus(HttpStatus.NO_CONTENT) void delete(@PathVariable UUID id) { service.delete(id); }
     public record ContentRequest(@NotNull ContentCategory category, @NotBlank @Size(max = 160) String title,
             @NotBlank @Size(max = 500) String summary, @NotBlank String body, UUID mediaId) {

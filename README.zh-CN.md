@@ -81,7 +81,7 @@ tools/                           # 仓库级 PowerShell 工具
 
 ## 启动本地后端
 
-复制环境变量示例并替换数据库密码、JWT secret、管理员密码和 MinIO secret：
+复制环境变量示例并替换数据库密码、JWT secret、管理员密码、只读演示账号密码和 MinIO secret：
 
 ```powershell
 Copy-Item infra/.env.example infra/.env
@@ -101,7 +101,7 @@ Set-Location apps/android
 .\gradlew.bat assembleDebug -PPHONECAR_API_BASE_URL=http://192.168.1.10:8080/api/v1/
 ```
 
-管理员由 `ADMIN_USERNAME`、`ADMIN_PASSWORD` 初始化。普通注册只能创建 `USER`，MinIO 凭证不会下发到 Android。公网部署前必须使用 HTTPS、强随机 secret 和反向代理。
+管理员由 `ADMIN_USERNAME`/`ADMIN_PASSWORD` 初始化，只读 Admin 演示账号由 `VIEWER_USERNAME`/`VIEWER_PASSWORD` 初始化。普通注册只能创建 `USER`。Android 保持 JSON refresh token 契约，后续 Web Admin 使用 `/api/v1/auth/admin/*` 和 HttpOnly refresh Cookie。MinIO 凭证不会下发到客户端；`prod` profile 会拒绝开发默认 secret、不安全 Cookie 和非 HTTPS 公共媒体地址。
 
 ## 构建与安装 Android
 
@@ -131,6 +131,14 @@ Jar 位于 `services/backend/build/libs/phonecar-backend.jar`。
 ```powershell
 pwsh -File .\tools\verify-all.ps1
 pwsh -File .\tools\verify-all.ps1 -IncludeDeviceTests
+```
+
+有意修改 API 后，必须显式评审并更新仓库中的 OpenAPI 快照：
+
+```powershell
+Push-Location services/backend
+.\gradlew.bat '-Dphonecar.updateOpenApiSnapshot=true' test --tests '*OpenApiContractTest'
+Pop-Location
 ```
 
 也可以分别执行：

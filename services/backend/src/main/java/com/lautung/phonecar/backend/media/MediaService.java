@@ -43,6 +43,7 @@ public class MediaService {
     public MediaAssetEntity upload(UUID adminId, MultipartFile file) {
         byte[] bytes = readAndValidate(file);
         DetectedImage detected = detect(bytes);
+        validateDeclaredContentType(file.getContentType(), detected.contentType());
         UUID id = UUID.randomUUID();
         String objectKey = "discovery/" + id + detected.extension();
         try {
@@ -98,6 +99,13 @@ public class MediaService {
         if (bytes.length >= 3 && (bytes[0] & 0xff) == 0xff && (bytes[1] & 0xff) == 0xd8 && (bytes[2] & 0xff) == 0xff) return new DetectedImage("image/jpeg", ".jpg");
         if (bytes.length >= 12 && ascii(bytes, 0, 4).equals("RIFF") && ascii(bytes, 8, 4).equals("WEBP")) return new DetectedImage("image/webp", ".webp");
         throw new ApiException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "UNSUPPORTED_MEDIA", "Only JPEG, PNG, and WebP images are allowed");
+    }
+
+    private void validateDeclaredContentType(String declared, String detected) {
+        if (declared != null && !declared.isBlank() && !detected.equals(declared.toLowerCase(Locale.ROOT))) {
+            throw new ApiException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "MEDIA_TYPE_MISMATCH",
+                    "Declared media type does not match image content");
+        }
     }
 
     private String ascii(byte[] bytes, int offset, int length) { return new String(bytes, offset, length, StandardCharsets.US_ASCII); }

@@ -4,6 +4,7 @@ springDependencyManagement = "1.1.7"
 springdoc = "3.0.3"
 minio = "9.0.3"
 testcontainers = "2.0.5"
+bucket4j = "8.19.0"
 
 [libraries]
 springdoc-openapi-ui = { group = "org.springdoc", name = "springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
@@ -11,6 +12,7 @@ minio = { group = "io.minio", name = "minio", version.ref = "minio" }
 testcontainers-bom = { group = "org.testcontainers", name = "testcontainers-bom", version.ref = "testcontainers" }
 testcontainers-junit = { group = "org.testcontainers", name = "testcontainers-junit-jupiter" }
 testcontainers-postgresql = { group = "org.testcontainers", name = "testcontainers-postgresql" }
+bucket4j-core = { group = "com.bucket4j", name = "bucket4j_jdk17-core", version.ref = "bucket4j" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "springBoot" }

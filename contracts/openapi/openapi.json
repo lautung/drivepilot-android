@@ -606,6 +606,22 @@
         "operationId" : "list_1",
         "parameters" : [ {
           "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "enum" : [ "DRAFT", "PUBLISHED", "UNPUBLISHED" ],
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "category",
+          "required" : false,
+          "schema" : {
+            "enum" : [ "RECOMMENDED", "LOCAL", "ACTIVITY", "STORE" ],
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
           "name" : "page",
           "required" : false,
           "schema" : {

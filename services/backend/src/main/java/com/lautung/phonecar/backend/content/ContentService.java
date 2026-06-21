@@ -75,8 +75,19 @@ public class ContentService {
     public void delete(UUID id) { contents.delete(require(id)); }
 
     @Transactional(readOnly = true)
-    public PageResponse<ContentView> adminList(int page, int size) {
-        return PageResponse.from(contents.findAll(pageRequest(page, size, "createdAt")), content -> view(content, null));
+    public PageResponse<ContentView> adminList(ContentStatus status, ContentCategory category, int page, int size) {
+        PageRequest pageable = pageRequest(page, size, "createdAt");
+        Page<DiscoveryContentEntity> result;
+        if (status != null && category != null) {
+            result = contents.findAllByStatusAndCategory(status, category, pageable);
+        } else if (status != null) {
+            result = contents.findAllByStatus(status, pageable);
+        } else if (category != null) {
+            result = contents.findAllByCategory(category, pageable);
+        } else {
+            result = contents.findAll(pageable);
+        }
+        return PageResponse.from(result, content -> view(content, null));
     }
 
     private DiscoveryContentEntity require(UUID id) { return contents.findById(id).orElseThrow(this::notFound); }

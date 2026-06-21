@@ -33,7 +33,7 @@
 - **我的：** 个人中心、行车报告、服务入口、账户安全和隐私设置。
 - **16 个可达页面：** 所有原型目标页均通过 Navigation Compose 连通。
 - **账号与同步：** 支持注册、登录、退出、令牌刷新，以及断网读取最近一次成功缓存。
-- **图片内容管理：** 管理员通过 Swagger 上传图片和发布发现内容；图片存放在私有 MinIO 桶并通过短期预签名 URL 读取。
+- **Web 管理端：** Vue 管理端支持安全登录、服务概览、媒体上传和发现内容全生命周期；公开 Viewer 账号保持只读。
 - **高保真原型资源：** 使用本地 Solar 矢量路径和原型图片，不以近似 Material 图标替代。
 
 ## 技术栈
@@ -46,6 +46,8 @@
 | Android 测试 | JUnit 4、Compose UI Test、AndroidX Test |
 | Android 版本 | minSdk 24，targetSdk 36 |
 | 后端 | Java 21、Spring Boot 4.1、PostgreSQL 16、Flyway、MinIO |
+| Web Admin | Vue 3、TypeScript、Vite、Element Plus、Pinia、TanStack Vue Query |
+| Web 测试 | Vitest、Vue Testing Library、MSW、Playwright |
 
 ## 仓库结构
 
@@ -57,6 +59,12 @@ apps/android/                    # 独立 Android Gradle 工程
 ├── gradle/libs.versions.toml    # Android 专用依赖
 ├── settings.gradle.kts         # 仅包含 :app
 └── gradlew.bat
+
+apps/admin-web/                  # 独立 Vue 3 管理端
+├── src/features/               # auth、dashboard、contents、media
+├── src/shared/api/             # OpenAPI 生成类型与请求边界
+├── e2e/                        # Admin/Viewer Playwright 流程
+└── package.json
 
 services/backend/                # 独立 Spring Boot Gradle 工程
 ├── src/main/java/.../backend/   # auth、vehicle、user、service、content、media
@@ -77,6 +85,7 @@ tools/                           # 仓库级 PowerShell 工具
 - PowerShell 7（Windows 环境优先）
 - Android Studio、Android SDK 36，以及 Android 7.0（API 24）或更高版本设备
 - Java 21、Docker Desktop 与 Docker Compose
+- Node.js 22+ 与 pnpm 10+
 - Android 和后端各自使用目录内的 Gradle Wrapper；macOS/Linux 将 `gradlew.bat` 替换为 `./gradlew`
 
 ## 启动本地后端
@@ -101,7 +110,19 @@ Set-Location apps/android
 .\gradlew.bat assembleDebug -PPHONECAR_API_BASE_URL=http://192.168.1.10:8080/api/v1/
 ```
 
-管理员由 `ADMIN_USERNAME`/`ADMIN_PASSWORD` 初始化，只读 Admin 演示账号由 `VIEWER_USERNAME`/`VIEWER_PASSWORD` 初始化。普通注册只能创建 `USER`。Android 保持 JSON refresh token 契约，后续 Web Admin 使用 `/api/v1/auth/admin/*` 和 HttpOnly refresh Cookie。MinIO 凭证不会下发到客户端；`prod` profile 会拒绝开发默认 secret、不安全 Cookie 和非 HTTPS 公共媒体地址。
+管理员由 `ADMIN_USERNAME`/`ADMIN_PASSWORD` 初始化，只读 Admin 演示账号由 `VIEWER_USERNAME`/`VIEWER_PASSWORD` 初始化。普通注册只能创建 `USER`。Android 保持 JSON refresh token 契约；Web Admin 使用 `/api/v1/auth/admin/*`，access token 只驻留内存，refresh token 使用 HttpOnly Cookie。MinIO 凭证不会下发到客户端；`prod` profile 会拒绝开发默认 secret、不安全 Cookie 和非 HTTPS 公共媒体地址。
+
+## 启动 Web 管理端
+
+先启动本地后端，再启动 Vite 开发服务器：
+
+```powershell
+Set-Location apps/admin-web
+pnpm install --frozen-lockfile
+pnpm dev
+```
+
+浏览器访问 `http://localhost:5173`。Vite 会把 `/api` 和 `/actuator` 同源代理到 `http://localhost:8080`。
 
 ## 构建与安装 Android
 
@@ -131,6 +152,7 @@ Jar 位于 `services/backend/build/libs/phonecar-backend.jar`。
 ```powershell
 pwsh -File .\tools\verify-all.ps1
 pwsh -File .\tools\verify-all.ps1 -IncludeDeviceTests
+pwsh -File .\tools\verify-all.ps1 -IncludeWebE2E
 ```
 
 有意修改 API 后，必须显式评审并更新仓库中的 OpenAPI 快照：
@@ -150,6 +172,15 @@ Pop-Location
 
 Push-Location services/backend
 .\gradlew.bat test bootJar
+Pop-Location
+
+Push-Location apps/admin-web
+pnpm lint
+pnpm format:check
+pnpm typecheck
+pnpm test --run
+pnpm api:check
+pnpm build
 Pop-Location
 
 docker compose -f infra/docker-compose.yml config --quiet

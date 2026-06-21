@@ -27,7 +27,13 @@ public class AdminContentController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping @ResponseStatus(HttpStatus.CREATED) ContentService.ContentView create(@Valid @RequestBody ContentRequest r) { return service.create(r.toService()); }
     @PreAuthorize("hasAnyRole('ADMIN', 'ADMIN_VIEWER')")
-    @GetMapping PageResponse<ContentService.ContentView> list(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) { return service.adminList(page, size); }
+    @GetMapping PageResponse<ContentService.ContentView> list(
+            @RequestParam(required = false) ContentStatus status,
+            @RequestParam(required = false) ContentCategory category,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return service.adminList(status, category, page, size);
+    }
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}") ContentService.ContentView update(@PathVariable UUID id, @Valid @RequestBody ContentRequest r) { return service.update(id, r.toService()); }
     @PreAuthorize("hasRole('ADMIN')")

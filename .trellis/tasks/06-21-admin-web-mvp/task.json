@@ -1,9 +1,9 @@
 {
-  "id": "project-completeness-roadmap",
-  "name": "project-completeness-roadmap",
-  "title": "探索项目完整性与下一步",
+  "id": "admin-web-mvp",
+  "name": "admin-web-mvp",
+  "title": "Vue 管理端 MVP",
   "description": "",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,
@@ -18,11 +18,8 @@
   "commit": null,
   "pr_url": null,
   "subtasks": [],
-  "children": [
-    "06-21-backend-contract-security-baseline",
-    "06-21-admin-web-mvp"
-  ],
-  "parent": null,
+  "children": [],
+  "parent": "06-21-project-completeness-roadmap",
   "relatedFiles": [],
   "notes": "",
   "meta": {}

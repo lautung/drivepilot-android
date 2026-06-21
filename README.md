@@ -33,7 +33,7 @@ Screenshots were captured from MuMu Android 12 at 1080 × 1920.
 - **Profile:** user center, driving reports, service entries, account security, and privacy settings.
 - **16 navigable screens:** all prototype destinations are connected through Navigation Compose.
 - **Accounts and sync:** registration, login, logout, token refresh, and cached reads when offline.
-- **Managed media:** admins upload private MinIO images and publish discovery content through Swagger; Android reads short-lived presigned URLs.
+- **Web Admin:** the Vue admin supports secure sign-in, service overview, media upload, and the full discovery-content lifecycle; the public Viewer account remains read-only.
 - **Prototype-faithful resources:** local Solar vector paths and reference images are used instead of approximate Material icons.
 
 ## Tech Stack
@@ -46,6 +46,8 @@ Screenshots were captured from MuMu Android 12 at 1080 × 1920.
 | Android testing | JUnit 4, Compose UI Test, AndroidX Test |
 | Android versions | minSdk 24, targetSdk 36 |
 | Backend | Java 21, Spring Boot 4.1, PostgreSQL 16, Flyway, MinIO |
+| Web Admin | Vue 3, TypeScript, Vite, Element Plus, Pinia, TanStack Vue Query |
+| Web testing | Vitest, Vue Testing Library, MSW, Playwright |
 
 ## Repository Layout
 
@@ -57,6 +59,12 @@ apps/android/                    # Independent Android Gradle project
 ├── gradle/libs.versions.toml    # Android-only dependencies
 ├── settings.gradle.kts         # Includes only :app
 └── gradlew.bat
+
+apps/admin-web/                  # Independent Vue 3 admin SPA
+├── src/features/               # auth, dashboard, contents, media
+├── src/shared/api/             # OpenAPI-generated types and request boundary
+├── e2e/                        # Admin/Viewer Playwright flows
+└── package.json
 
 services/backend/                # Independent Spring Boot Gradle project
 ├── src/main/java/.../backend/   # auth, vehicle, user, service, content, media
@@ -77,6 +85,7 @@ The server is authoritative for signed-in business state. DataStore retains the 
 - PowerShell 7 on Windows
 - Android Studio, Android SDK 36, and an Android 7.0 (API 24) or newer device
 - Java 21, Docker Desktop, and Docker Compose
+- Node.js 22+ and pnpm 10+
 - Android and backend use the wrapper inside their own directory; on macOS/Linux, replace `gradlew.bat` with `./gradlew`
 
 ## Run the Local Backend
@@ -101,7 +110,19 @@ Set-Location apps/android
 .\gradlew.bat assembleDebug -PPHONECAR_API_BASE_URL=http://192.168.1.10:8080/api/v1/
 ```
 
-The bootstrap admin comes from `ADMIN_USERNAME`/`ADMIN_PASSWORD`; the read-only Admin demo account comes from `VIEWER_USERNAME`/`VIEWER_PASSWORD`. Normal registration always creates `USER`. Android keeps its JSON refresh-token contract, while the future Web Admin uses `/api/v1/auth/admin/*` with an HttpOnly refresh cookie. MinIO credentials are never sent to clients. The `prod` profile rejects development secrets, insecure Admin cookies, and non-HTTPS public media endpoints.
+The bootstrap admin comes from `ADMIN_USERNAME`/`ADMIN_PASSWORD`; the read-only Admin demo account comes from `VIEWER_USERNAME`/`VIEWER_PASSWORD`. Normal registration always creates `USER`. Android keeps its JSON refresh-token contract. Web Admin uses `/api/v1/auth/admin/*`: the access token remains in memory and the refresh token uses an HttpOnly cookie. MinIO credentials are never sent to clients. The `prod` profile rejects development secrets, insecure Admin cookies, and non-HTTPS public media endpoints.
+
+## Run Web Admin
+
+Start the local backend first, then run the Vite development server:
+
+```powershell
+Set-Location apps/admin-web
+pnpm install --frozen-lockfile
+pnpm dev
+```
+
+Open `http://localhost:5173`. Vite proxies `/api` and `/actuator` to `http://localhost:8080` on the same origin.
 
 ## Build and Install Android
 
@@ -131,6 +152,7 @@ Run repository-level verification from the root:
 ```powershell
 pwsh -File .\tools\verify-all.ps1
 pwsh -File .\tools\verify-all.ps1 -IncludeDeviceTests
+pwsh -File .\tools\verify-all.ps1 -IncludeWebE2E
 ```
 
 When an API change is intentional, review and update the committed OpenAPI snapshot explicitly:
@@ -150,6 +172,15 @@ Pop-Location
 
 Push-Location services/backend
 .\gradlew.bat test bootJar
+Pop-Location
+
+Push-Location apps/admin-web
+pnpm lint
+pnpm format:check
+pnpm typecheck
+pnpm test --run
+pnpm api:check
+pnpm build
 Pop-Location
 
 docker compose -f infra/docker-compose.yml config --quiet

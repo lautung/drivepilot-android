@@ -52,3 +52,13 @@ credentials/
 *.pfx
 *.jks
 *.keystore
+
+# Node, Vite, Vitest, and Playwright
+**/node_modules/
+**/dist/
+**/coverage/
+**/.vite/
+**/.vitest/
+**/test-results/
+**/playwright-report/
+**/playwright/.cache/

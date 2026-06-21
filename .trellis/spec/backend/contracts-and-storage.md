@@ -14,8 +14,10 @@
 - 公共运维：`GET /actuator/health`、`GET /v3/api-docs`。
 - 用户：`GET/PATCH /api/v1/vehicle-state`、`GET/PATCH /api/v1/me/preferences`、发现内容、车辆预订、维保预约和订阅接口。
 - 管理：`GET /api/v1/admin/**` 允许 `ADMIN_VIEWER`/`ADMIN`；POST/PUT/PATCH/DELETE 只允许 `ADMIN`，并同时由 URL 规则和 `@PreAuthorize` 防守。
+- Admin 内容筛选：`GET /api/v1/admin/discovery/contents?page=0&size=20&status=DRAFT&category=ACTIVITY`；`status`、`category` 均为可选参数，可单独或组合使用，筛选必须在数据库分页前执行。
 - 数据库主键使用 UUID，时间使用 UTC `Instant`，有限值使用大写枚举字符串；车辆状态 PATCH 必须携带 `version: long`。
 - 列表响应固定为 `items/page/size/totalElements/totalPages`。
+- Admin 内容列表无筛选时按 `createdAt DESC` 返回全部内容；`status` 使用 `DRAFT|PUBLISHED|UNPUBLISHED`，`category` 使用 `RECOMMENDED|LOCAL|ACTIVITY|STORE`，旧的仅分页调用保持兼容。
 
 ### 3. Contracts
 
@@ -35,6 +37,7 @@
 | 条件 | HTTP / code |
 | --- | --- |
 | 请求字段非法 | `400 VALIDATION_FAILED` |
+| 查询参数枚举非法 | `400 INVALID_PARAMETER` |
 | 用户名重复 | `409 USERNAME_TAKEN` |
 | 登录失败 | `401 INVALID_CREDENTIALS` |
 | 普通 USER 尝试 Web Admin 登录 | `403 ADMIN_ACCESS_REQUIRED` |
@@ -62,6 +65,7 @@
 - Testcontainers PostgreSQL：从空库运行 Flyway/JPA validate、密码哈希、用户隔离、乐观锁、并发 refresh 只有一次成功。
 - Security/HTTP：USER/ADMIN_VIEWER/ADMIN 矩阵、Web Cookie 属性和轮换、`429` ProblemDetail、分页、UUID/Instant/enum。
 - OpenAPI：普通测试比较 `contracts/openapi/openapi.json`；只有显式 `-Dphonecar.updateOpenApiSnapshot=true` 才能更新，并必须评审 diff。
+- Admin 内容筛选：断言无筛选、仅 status、仅 category、组合筛选四条路径的结果与分页元数据；Viewer 可读取，写权限矩阵不变。
 - MinIO：真实容器覆盖 bucket 初始化、合法上传、MIME/魔数/大小、预签名、引用删除冲突和 503 映射。
 - 修改 migration 时必须从空数据库执行全量 migration；绝不能通过 Hibernate 自动更新掩盖 schema 问题。
 

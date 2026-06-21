@@ -138,3 +138,36 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 5: 完成后端契约与安全基线
+
+**Date**: 2026-06-21
+**Task**: 完成后端契约与安全基线
+**Branch**: `master`
+
+### Summary
+
+完成 Spring Security 双客户端认证、ADMIN_VIEWER 只读权限、Bucket4j 限流、生产配置守卫、OpenAPI 快照、V3 migration 与 21 个后端测试；验证 Android 兼容、Docker 升级和统一质量门。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `5761902` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

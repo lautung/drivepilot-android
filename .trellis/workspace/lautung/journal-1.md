@@ -105,3 +105,36 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 4: 补齐后端开发规范
+
+**Date**: 2026-06-21
+**Task**: 补齐后端开发规范
+**Branch**: `master`
+
+### Summary
+
+根据真实 Spring Boot 代码补齐目录、数据库、错误、日志和质量规范，并完成链接与后端构建验证。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `12ea12aaa6038c848300fc14c37908b9b47b141d` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

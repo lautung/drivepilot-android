@@ -21,8 +21,15 @@ the rest conversationally.
 
 ## Status (update the checkboxes as you complete each item)
 
-- [ ] Fill backend guidelines
-- [ ] Add code examples
+- [x] Fill backend guidelines
+- [x] Add code examples
+
+### Completion evidence
+
+- 已创建并索引 `directory-structure.md`、`database-guidelines.md`、`error-handling.md`、`logging-guidelines.md`、`quality-guidelines.md`。
+- 规则来自 `services/backend/` 的真实 Controller、Service、Entity、Repository、migration、配置与 `BackendIntegrationTest`。
+- 所有专题包含真实类型或代码示例；日志规范明确记录当前“无显式业务 Logger”的基线。
+- 后端规范相对链接及未完成标记检查通过；`test bootJar` 通过。
 
 ---
 

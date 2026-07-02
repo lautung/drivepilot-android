@@ -204,3 +204,36 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 7: Fix GitHub language stats
+
+**Date**: 2026-07-02
+**Task**: Fix GitHub language stats
+**Branch**: `master`
+
+### Summary
+
+Added .gitattributes rules to exclude Trellis/agent metadata, documentation, generated artifacts, lockfiles, and binary media from GitHub Linguist language statistics while keeping product source files counted.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `69c27e1` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

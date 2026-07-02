@@ -1,0 +1,26 @@
+# Keep GitHub language statistics focused on product source code.
+
+# Project management, agent, and local assistant metadata.
+.agents/** linguist-vendored
+.codex/** linguist-vendored
+.trellis/** linguist-vendored
+AGENTS.md linguist-documentation
+
+# Documentation should not dominate language stats.
+docs/** linguist-documentation
+**/*.md linguist-documentation
+
+# Generated dependency and build artifacts.
+**/node_modules/** linguist-vendored
+**/dist/** linguist-generated
+**/build/** linguist-generated
+**/.gradle/** linguist-generated
+**/.kotlin/** linguist-generated
+**/test-results/** linguist-generated
+**/pnpm-lock.yaml linguist-generated
+
+# Binary media assets are not source-language signals.
+**/*.png binary linguist-generated
+**/*.jpg binary linguist-generated
+**/*.jpeg binary linguist-generated
+**/*.webp binary linguist-generated
